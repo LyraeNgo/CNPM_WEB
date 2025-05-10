@@ -198,3 +198,30 @@ input {
     padding: 2% ;
 }
 
+footer a:hover {
+  text-decoration: underline;
+}
+
+#scrollTopBtn{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    z-index: 999;
+    transition: background-color 0.3s ease;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    
+}
+#scrollTopBtn:hover{
+    background-color: rgba(0, 0, 0, 0.8);
+}

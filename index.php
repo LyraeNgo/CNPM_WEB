@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="asset/css/style.css">
+    <script src="main.js"></script>
     <style>
         .page-top, header {
             color: whitesmoke;
@@ -211,6 +212,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<!-- swiper js -->
 <script>
     const progressCircle = document.querySelector(".autoplay-progress svg");
     const progressContent = document.querySelector(".autoplay-progress span");
@@ -238,4 +240,49 @@
     });
 </script>
 </body>
+<!-- Footer -->
+<footer class="bg-dark text-white pt-5 pb-3 mt-5">
+  <div class="container">
+    <div class="row">
+      <!-- About Us -->
+      <div class="col-md-4">
+        <h5>About Us</h5>
+        <p>We offer top-quality computers, laptops, and accessories. Trusted by thousands of tech enthusiasts.</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-md-4">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="index.php" class="text-white">Home</a></li>
+          <li><a href="products.php" class="text-white">Products</a></li>
+          <li><a href="about.php" class="text-white">About</a></li>
+          <li><a href="contact.php" class="text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="col-md-4">
+        <h5>Contact Us</h5>
+        <p>📞 +123 456 7890</p>
+        <p>📧 support@computershop.com</p>
+        <p>📍 123 Tech Street, Silicon City</p>
+      </div>
+    </div>
+    
+
+
+
+    <hr class="bg-light">
+
+    <div class="text-center">
+      &copy; <?php echo date("Y"); ?> Computer Shop. All rights reserved.
+    </div>
+  </div>
+</footer>
+<!-- Scroll to Top Button -->
+<button onclick="topFunction()" id="scrollTopBtn" class="btn btn-primary">
+  ↑
+</button>
+
 </html>
