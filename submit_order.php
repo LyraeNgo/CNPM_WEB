@@ -1,3 +1,29 @@
+<?php 
+    session_start();
+    require_once("./BE/db.php");
+    require_once("./BE/product.php");
+    $conn = create_connection();
+    if($conn->connect_error) {
+        die("fail to connect" . $conn->connect_error);
+    }
+
+    $username = $_SESSION['username'];
+
+    $stmt = $conn->prepare("SELECT name FROM customer WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $stmt->close();
+      $conn->close();
+    
+    if(isset($_SESSION['username'])){
+      $username = $row['name'];
+    }else{
+      $username='Tài Khoản';
+    }}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -5,103 +31,18 @@
   <title>Giỏ hàng | GIANG-HIEUKY</title>
   <link rel="stylesheet" href="cart.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="asset/css/submit_order.css">
 </head>
-<style>
-    body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f5f5f5;
-}
-
-.navbar {
-  background: #222;
-  color: white;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.navbar a {
-  color: white;
-  margin-left: 15px;
-  text-decoration: none;
-}
-
-.navbar a.active {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-.cart-container {
-  max-width: 1000px;
-  margin: 30px auto;
-  background: white;
-  padding: 20px;
-  border-radius: 6px;
-}
-
-.cart-header, .cart-item {
-  display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.product-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.product-info img {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-}
-
-.quantity {
-  display: flex;
-  align-items: center;
-}
-
-.quantity input {
-  width: 40px;
-  text-align: center;
-}
-
-.quantity button {
-  width: 25px;
-  height: 25px;
-}
-
-.remove-btn {
-  background: transparent;
-  color: red;
-  border: none;
-  cursor: pointer;
-}
-
-.cart-footer {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.checkout {
-  background: #f60;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
-}
-
-</style>
 <body>
   <header class="navbar">
     <div class="logo"><a href="index.html">🖥️ GIANG-HIEUKY</a></div>
     <div class="nav-right">
       <a href="index.php">Trang chủ</a>
+      <?php if (isset($_SESSION['username'])): ?>
+        <span class="text-muted"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($username) ?></span>
+      <?php else: ?>
+        <a href="account.php"><i class="fa-solid fa-user"></i> Tài Khoản</a>
+      <?php endif; ?>
     </div>
   </header>
   <section class="cart-container">
@@ -114,7 +55,7 @@
       <span>Thao tác</span>
     </div>
 
-    <form action="submit_order.html" method="POST">
+    <form action="submit_order.php" method="POST">
       <div class="cart-item">
         <div class="product-info">
           <img src="${product.image}" alt="">
@@ -191,71 +132,37 @@
         const cartItem = `
           <div class="cart-item">
             <div class="product-info">
-              <img src="${product.image}" alt="">
+              <img src="asset/productImg/${product.image}" alt="">
               <div>
                 <p>${product.name}</p>
                 <small>Phân loại: <input type="text" name="category[]" value="${product.category}" readonly></small>
                 <input type="hidden" name="productName[]" value="${product.name}">
                 <input type="hidden" name="price[]" value="${product.price}">
+                <input type="hidden" name="quantity[]" value="${product.quantity}">
               </div>
             </div>
             <div>₫${parseInt(product.price).toLocaleString()}</div>
             <div class="quantity">
-              <button type="button" onclick="changeQty(${product.id}, -1)">-</button>
-              <input type="text" name="quantity[]" value="${product.quantity}" id="qty-${product.id}">
-              <button type="button" onclick="changeQty(${product.id}, 1)">+</button>
+              <input type="text" name="quantity" value="${product.quantity}" readonly>
             </div>
             <div class="subtotal">₫${(parseInt(product.price) * parseInt(product.quantity)).toLocaleString()}</div>
-            <div><button type="button" class="remove-btn" onclick="removeProduct(${product.id})">Xóa</button></div>
+            <div><button type="button" class="remove-btn" disabled>Xóa</button></div>
           </div>
         `;
         $('form').prepend(cartItem);
       });
 
-      // Update total
-      updateTotal();
+      // Calculate and display total
+      let total = 0;
+      selectedProducts.forEach(product => {
+        total += parseInt(product.price) * parseInt(product.quantity);
+      });
+      $('.total').text('₫' + total.toLocaleString());
     });
 
-    function updateTotal() {
-      let total = 0;
-      document.querySelectorAll('input[name="productId[]"]:checked').forEach(function(checkbox) {
-        let qty = parseInt(checkbox.closest('.cart-item').querySelector('input[name="quantity[]"]').value);
-        let price = parseInt(checkbox.closest('.cart-item').querySelector('input[name="price[]"]').value);
-        total += price * qty;
-      });
-      document.querySelector('.total').textContent = '₫' + total.toLocaleString();
-    }
-  
-    function changeQty(productId, amount) {
-      let qtyInput = document.getElementById('qty-' + productId);
-      let currentQty = parseInt(qtyInput.value);
-      if (!isNaN(currentQty)) {
-        qtyInput.value = Math.max(1, currentQty + amount);
-        updateSubtotal(productId);
-      }
-    }
-  
-    function updateSubtotal(productId) {
-      let checkbox = document.querySelector('input[name="productId[]"][value="' + productId + '"]');
-      let qty = parseInt(document.getElementById('qty-' + productId).value);
-      let price = parseInt(checkbox.closest('.cart-item').querySelector('input[name="price[]"]').value);
-      let subtotalElement = checkbox.closest('.cart-item').querySelector('.subtotal');
-      subtotalElement.textContent = '₫' + (price * qty).toLocaleString();
-      updateTotal();
-    }
-  
-    function removeProduct(productId) {
-      let checkbox = document.querySelector('input[name="productId[]"][value="' + productId + '"]');
-      if (checkbox.checked) {
-        checkbox.closest('.cart-item').remove();
-        updateTotal();
-      }
-    }
-  
-    // ✅ QR Code hiển thị đúng
     function generateQRCode() {
       const qrContainer = $('#qr-container');
-      qrContainer.empty(); // Xoá QR cũ nếu có
+      qrContainer.empty(); 
   
       const randomCode = "PAY_" + Math.random().toString(36).substring(2, 10).toUpperCase();
       const qrDiv = $('<div id="qrcode"></div>');
@@ -270,7 +177,7 @@
   
     function generateBankCards() {
       const eWalletContainer = $('#e-wallet-container');
-      eWalletContainer.empty(); // Clear previous content
+      eWalletContainer.empty();
 
       const cards = [
         { amount: '₫50000', bank: 'Nam A Bank', description: 'Đơn từ 299.000₫ với thẻ tín dụng Nam A Bank JCB', color: '#f39c12' },
@@ -336,21 +243,28 @@
         }
       });
   
-      $('input[name="productId[]"]').on('change', function () {
-        updateSubtotal(this.value);
-        updateTotal();
-      });
-  
       $('form').on('submit', function (e) {
-        const anyChecked = $('input[name="productId[]"]:checked').length > 0;
-        if (!anyChecked) {
-          e.preventDefault();
-          alert('Vui lòng chọn ít nhất một sản phẩm trước khi mua hàng.');
-        }
+        e.preventDefault();
+        // Get form data
+        const formData = new FormData(this);
+        formData.append('paymentMethod', $('input[name="paymentMethod"]:checked').val());
+        
+        // Send data to server
+        $.ajax({
+          url: 'submit_order.php',
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(response) {
+            alert('Đặt hàng thành công!');
+            window.location.href = 'index.php';
+          },
+          error: function() {
+            alert('Có lỗi xảy ra khi đặt hàng!');
+          }
+        });
       });
-      
-      // Initial total update
-      updateTotal();
     });
   </script>
   
