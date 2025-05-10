@@ -18,9 +18,11 @@
       $stmt->close();
       $conn->close();
     
-    $username='Tài Khoản';
+    
     if(isset($_SESSION['username'])){
       $username = $row['name'];
+    }else{
+      $username='Tài Khoản';
     }}
 ?>
 
@@ -81,9 +83,15 @@
             <!-- account and cart -->
             <div class="col-12 col-md-3 text-center text-md-right text-dark">
                 <ul class="list-inline mb-0">
+
 <li class="list-inline-item">
-  <a href="account.php"><i class="fa-solid fa-user"></i> <?= $username ?></a>
+  <?php if (isset($_SESSION['username'])): ?>
+    <span class="text-muted"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($username) ?></span>
+  <?php else: ?>
+    <a href="login.php"><i class="fa-solid fa-user"></i> Tài Khoản</a>
+  <?php endif; ?>
 </li>
+
 <?php if (isset($_SESSION['username'])): ?>
   <li class="list-inline-item">
     <a href="logout.php" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
