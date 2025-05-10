@@ -88,7 +88,7 @@
   <?php if (isset($_SESSION['username'])): ?>
     <span class="text-muted"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($username) ?></span>
   <?php else: ?>
-    <a href="login.php"><i class="fa-solid fa-user"></i> Tài Khoản</a>
+    <a href="account.php"><i class="fa-solid fa-user"></i> Tài Khoản</a>
   <?php endif; ?>
 </li>
 
@@ -121,12 +121,10 @@
     <!-- Main menu -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ml-auto header-top-user_cart">
-        <li class="nav-item"><a class="nav-link" href="#">Xây dựng cấu hình pc</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Laptop</a></li>
         <li class="nav-item"><a class="nav-link" href="#">PC gaming</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Màn hình</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Laptop</a></li>
         <li class="nav-item"><a class="nav-link" href="#">PC văn phòng</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Khuyến mãi</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Giới thiệu</a></li>
       </ul>
     </div>
@@ -139,7 +137,7 @@
     <?php 
       require_once("./BE/db.php");
       $conn = create_connection();
-      $sql = "SELECT * FROM category LIMIT 25";
+      $sql = "SELECT * FROM category";
       $caterogy = $conn->query($sql);
 
       if ($caterogy && $caterogy->num_rows > 0) {

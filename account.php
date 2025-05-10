@@ -29,7 +29,7 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         // Check if a user is found
         if ($result->num_rows >0) {
             if($user==='admin' and $pass=== 'admin123') {
-                header("Location: admin.php");
+                header("Location: admin.html");
                 exit();    
             }else if($user==='supplier' and $pass=== 'supplier123'){
                 header('Location: supplier.php');
