@@ -82,6 +82,16 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
+    // Function to update cart quantity display throughout the app
+    function updateCartQuantity() {
+      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      const totalQuantity = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+      const cartQuantityElements = document.querySelectorAll('.dot-cart');
+      cartQuantityElements.forEach(element => {
+        element.textContent = totalQuantity;
+      });
+    }
+    
     $(document).ready(function() {
       <?php if (isset($_SESSION['username'])): ?>
         // Load cart items from localStorage
@@ -125,6 +135,9 @@
 
         // Initial total update
         updateTotal();
+        
+        // Make sure cart quantity is up-to-date
+        updateCartQuantity();
       <?php endif; ?>
     });
 
@@ -142,11 +155,22 @@
       let qtyInput = document.getElementById('qty-' + productId);
       let currentQty = parseInt(qtyInput.value);
       if (!isNaN(currentQty)) {
-        qtyInput.value = Math.max(1, currentQty + amount);
+        const newQty = Math.max(1, currentQty + amount);
+        qtyInput.value = newQty;
         updateSubtotal(productId);
+        let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        cartItems = cartItems.map(item => {
+          if (item.id == productId) {
+            item.quantity = newQty;
+          }
+          return item;
+        });
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        // Update cart quantity display
+        updateCartQuantity();
       }
     }
-  
+
     function updateSubtotal(productId) {
       let checkbox = document.querySelector('input[name="productId[]"][value="' + productId + '"]');
       let qty = parseInt(document.getElementById('qty-' + productId).value);
@@ -157,10 +181,36 @@
     }
   
     function removeProduct(productId) {
-      let checkbox = document.querySelector('input[name="productId[]"][value="' + productId + '"]');
-      if (checkbox.checked) {
-        checkbox.closest('.cart-item').remove();
+      if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+        // Lấy danh sách sản phẩm từ localStorage
+        let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        console.log('Before removal:', cartItems);
+        
+        // Convert productId to number to ensure consistent comparison
+        const productIdNum = parseInt(productId);
+        
+        // Lọc bỏ sản phẩm có productId cần xóa, sử dụng loose equality (==)
+        cartItems = cartItems.filter(item => parseInt(item.id) != productIdNum);
+        console.log('After removal:', cartItems);
+        
+        // Cập nhật lại localStorage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        console.log('Updated localStorage:', JSON.parse(localStorage.getItem('cartItems')));
+        
+        // Xóa phần tử khỏi DOM
+        const cartItem = document.querySelector(`.cart-item input[value="${productId}"]`).closest('.cart-item');
+        cartItem.remove();
+        
+        // Cập nhật tổng tiền
         updateTotal();
+        
+        // Cập nhật số lượng giỏ hàng
+        updateCartQuantity();
+        
+        // Nếu không còn sản phẩm nào, hiển thị thông báo
+        if (cartItems.length === 0) {
+          $('#cartItems').html('<div class="text-center py-4">Giỏ hàng của bạn đang trống</div>');
+        }
       }
     }
   
@@ -191,7 +241,8 @@
         }
       });
 
-      $('input[name="productId[]"]').on('change', function () {
+      // Add event listeners for product checkboxes
+      $(document).on('change', 'input[name="productId[]"]', function () {
         updateSubtotal(this.value);
         updateTotal();
       });
@@ -203,8 +254,6 @@
           alert('Vui lòng chọn ít nhất một sản phẩm trước khi mua hàng.');
           return;
         }
-
-        // Get all selected products data
         const selectedProducts = [];
         $('input[name="productId[]"]:checked').each(function() {
           const item = $(this).closest('.cart-item');
@@ -217,10 +266,7 @@
           });
         });
 
-        // Store the data in localStorage
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
-        
-        // Redirect to submit_order.html
         window.location.href = 'submit_order.php';
       });
 
