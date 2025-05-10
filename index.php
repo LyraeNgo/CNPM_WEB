@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cartQuantityElement = document.querySelector('.dot-cart');
     if (cartQuantityElement) {
         cartQuantityElement.textContent = totalQuantity;
-        console.log('Updated Cart Quantity:', cartQuantityElement.textContent); 
+        console.log('Updated Cart Quantity:', cartQuantityElement.textContent); // Kiểm tra cập nhật giao diện
     }
 });
 </script>
