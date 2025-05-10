@@ -28,6 +28,7 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
 
         // Check if a user is found
         if ($result->num_rows >0) {
+            
             $_SESSION['username'] = $user;
             header("Location: index.php");
             exit(); 

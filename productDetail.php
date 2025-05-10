@@ -1,10 +1,31 @@
-<?php 
-    require_once("./BE/db.php");
-    require_once("./BE/product.php");
-    $conn = create_connection();
-    if($conn->connect_error) {
-        die("fail to connect" . $conn->connect_error);
-    }
+<?php
+require_once("./BE/db.php");
+require_once("./BE/product.php");
+
+$conn = create_connection();
+// Check if productID is set in the URL
+if (isset($_GET['productId'])) {
+    $productID = $_GET['productId'];
+    
+} else {
+    echo "Product ID not provided!";
+}
+
+
+
+$productId = $_GET['productId'];
+
+
+$stmt = $conn->prepare("SELECT * FROM product WHERE productId = ?");
+$stmt->bind_param("i", $productId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    die("Product not found.");
+}
+
+$product = $result->fetch_assoc();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -148,36 +169,21 @@
     </div>
 </section>
 
-<!-- Popular Products -->
-<section class="hot-product py-5">
+
+<!-- Product Details -->
+<section class="py-5">
     <div class="container">
         <div class="row">
-            <?php 
-                $products = get_products();
-                foreach ($products as $p) {
-                    if ($p['popular'] === '1') {
-                        $pID = $p['productId'];
-                        $pname = $p['name'];
-                        $des = $p['description'];
-                        $price = $p['price'];
-                        $stock = $p['stockQuantity'];    
-                        $img = $p['image'];  
-            ?>
-            
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-4">
-                <a href="productDetail.php?productId=<?= $pID ?>" class="text-decoration-none text-dark">
-                    <div class="card h-100">
-                        <img class="card-img-top img-fluid" src="asset/productImg/<?=$img?>" alt="Image">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= $pname ?></h5>
-                            <h6 class="card-subtitle mb-2 text-muted">$<?= $price ?></h6>
-                            <p class="card-text"><?= $des ?></p>
-                            <p class="card-text"><small class="text-muted">Stock: <?= $stock ?></small></p>
-                        </div>
-                    </div>
-                </a>
+            <div class="col-md-6">
+                <img src="asset/productImg/<?=$product['image']?>" class="img-fluid" alt="<?=$product['name']?>">
             </div>
-            <?php } } ?>
+            <div class="col-md-6">
+                <h3><?=$product['name']?></h3>
+                <p><strong>Description:</strong> <?=$product['description']?></p>
+                <p><strong>Price:</strong> $<?=$product['price']?></p>
+                <p><strong>Stock:</strong> <?=$product['stockQuantity']?></p>
+                <button class="btn btn-primary">Add to Cart</button>
+            </div>
         </div>
     </div>
 </section>
@@ -290,3 +296,27 @@
 </button>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
