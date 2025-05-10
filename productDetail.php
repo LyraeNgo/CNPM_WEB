@@ -1,4 +1,29 @@
 <?php
+session_start();
+    require_once("./BE/db.php");
+    require_once("./BE/product.php");
+    $conn = create_connection();
+    if($conn->connect_error) {
+        die("fail to connect" . $conn->connect_error);
+    }
+
+    $username = $_SESSION['username'];
+
+    $stmt = $conn->prepare("SELECT name FROM customer WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $stmt->close();
+      $conn->close();
+    
+    
+    if(isset($_SESSION['username'])){
+      $username = $row['name'];
+    }else{
+      $username='Tài Khoản';
+    }}
 require_once("./BE/db.php");
 require_once("./BE/product.php");
 
@@ -84,7 +109,13 @@ $product = $result->fetch_assoc();
             <!-- account and cart -->
             <div class="col-12 col-md-3 text-center text-md-right text-dark">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item"><a href="account.php"><i class="fa-solid fa-user"></i> Tài khoản</a></li>
+                    <li class="list-inline-item">
+  <?php if (isset($_SESSION['username'])): ?>
+    <span class="text-muted"><i class="fa-solid fa-user"></i> <?= htmlspecialchars($username) ?></span>
+  <?php else: ?>
+    <a href="account.php"><i class="fa-solid fa-user"></i> Tài Khoản</a>
+  <?php endif; ?>
+</li>
                     <li class="list-inline-item "><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></li>
                 </ul>
             </div>
@@ -182,7 +213,16 @@ $product = $result->fetch_assoc();
                 <p><strong>Description:</strong> <?=$product['description']?></p>
                 <p><strong>Price:</strong> $<?=$product['price']?></p>
                 <p><strong>Stock:</strong> <?=$product['stockQuantity']?></p>
-                <button class="btn btn-primary">Add to Cart</button>
+                <form id="addToCartForm" method="POST" action="cart.php">
+                    <input type="hidden" name="productId" value="<?=$product['productId']?>">
+                    <input type="hidden" name="productName" value="<?=$product['name']?>">
+                    <input type="hidden" name="price" value="<?=$product['price']?>">
+                    <input type="hidden" name="image" value="<?=$product['image']?>">
+                    <input type="hidden" name="categoryId" value="<?=$product['categoryId']?>">
+                    <input type="hidden" name="description" value="<?=$product['description']?>">
+                    <input type="hidden" name="stockQuantity" value="<?=$product['stockQuantity']?>">
+                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                </form>
             </div>
         </div>
     </div>
@@ -249,6 +289,54 @@ $product = $result->fetch_assoc();
         }
     });
 </script>
+<script>
+    document.getElementById('addToCartForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Check if user is logged in
+        <?php if (!isset($_SESSION['username'])): ?>
+            alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+            window.location.href = 'account.php';
+            return;
+        <?php endif; ?>
+
+        // Get form data
+        const formData = new FormData(this);
+        const productData = {
+            id: formData.get('productId'),
+            name: formData.get('productName'),
+            price: formData.get('price'),
+            image: formData.get('image'),
+            categoryId: formData.get('categoryId'),
+            description: formData.get('description'),
+            stockQuantity: formData.get('stockQuantity'),
+            quantity: 1
+        };
+
+        // Get existing cart items from localStorage
+        let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        
+        // Check if product already exists in cart
+        const existingItemIndex = cartItems.findIndex(item => item.id === productData.id);
+        if (existingItemIndex > -1) {
+            // Check if adding more would exceed stock
+            if (cartItems[existingItemIndex].quantity + 1 <= productData.stockQuantity) {
+                cartItems[existingItemIndex].quantity += 1;
+            } else {
+                alert('Số lượng sản phẩm trong giỏ hàng đã đạt tối đa!');
+                return;
+            }
+        } else {
+            cartItems.push(productData);
+        }
+
+        // Save updated cart to localStorage
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        
+        // Redirect to cart page
+        window.location.href = 'cart.php';
+    });
+</script>
 </body>
 <!-- Footer -->
 <footer class="bg-dark text-white pt-5 pb-3 mt-5">
@@ -295,27 +383,3 @@ $product = $result->fetch_assoc();
 </button>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
