@@ -23,6 +23,7 @@
       $username = $row['name'];
     }}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,7 +53,7 @@
             <div class="col text-center text-md-left">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item mr-3"><i class="fa-solid fa-phone-volume"></i> <a href="tel:0905379388" class="text-white">0905379388</a></li>
-                    <li class="list-inline-item"><i class="fa-solid fa-envelope"></i> <a href="mailto:nguyencaoky1603@gmail.com" class="text-white">nguyencaoky1603@gmail.com</a></li>
+                    <li class="list-inline-item"><i class="fa-solid fa-envelope"></i> <a href="contact.html" class="text-white">LIÊN HỆ</a></li>
                 </ul>
             </div>
         </div>
@@ -81,7 +82,7 @@
             <div class="col-12 col-md-3 text-center text-md-right text-dark">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item"><a href="account.php"><i class="fa-solid fa-user"></i> <?= $username?></a></li>
-                    <li class="list-inline-item "><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></li>
+                    <li class="list-inline-item"><a href="cart.html" class="text-dark"><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></a></li>
                 </ul>
             </div>
         </div>
@@ -277,8 +278,7 @@
         <ul class="list-unstyled">
           <li><a href="index.php" class="text-white">Home</a></li>
           <li><a href="products.php" class="text-white">Products</a></li>
-          <li><a href="about.php" class="text-white">About</a></li>
-          <li><a href="contact.php" class="text-white">Contact</a></li>
+          <li><a href="contact.html" class="text-white">Contact</a></li>
         </ul>
       </div>
 
