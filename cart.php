@@ -254,6 +254,8 @@
           alert('Vui lòng chọn ít nhất một sản phẩm trước khi mua hàng.');
           return;
         }
+
+        // Get all selected products data
         const selectedProducts = [];
         $('input[name="productId[]"]:checked').each(function() {
           const item = $(this).closest('.cart-item');
@@ -266,7 +268,10 @@
           });
         });
 
+        // Store the data in localStorage
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+        
+        // Redirect to submit_order.html
         window.location.href = 'submit_order.php';
       });
 
