@@ -81,7 +81,14 @@
             <!-- account and cart -->
             <div class="col-12 col-md-3 text-center text-md-right text-dark">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item"><a href="account.php"><i class="fa-solid fa-user"></i> <?= $username?></a></li>
+<li class="list-inline-item">
+  <a href="account.php"><i class="fa-solid fa-user"></i> <?= $username ?></a>
+</li>
+<?php if (isset($_SESSION['username'])): ?>
+  <li class="list-inline-item">
+    <a href="logout.php" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+  </li>
+<?php endif; ?>
                     <li class="list-inline-item"><a href="cart.html" class="text-dark"><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></a></li>
                 </ul>
             </div>
