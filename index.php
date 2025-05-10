@@ -97,7 +97,7 @@
     <a href="logout.php" class="text-danger"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
   </li>
 <?php endif; ?>
-                    <li class="list-inline-item"><a href="cart.html" class="text-dark"><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></a></li>
+                    <li class="list-inline-item"><a href="cart.php" class="text-dark"><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></a></li>
                 </ul>
             </div>
         </div>
@@ -273,6 +273,22 @@
             }
         }
     });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Lấy số lượng sản phẩm trong giỏ hàng từ localStorage
+    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    console.log('Cart Items:', cartItems); // Kiểm tra dữ liệu trong localStorage
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    console.log('Total Quantity:', totalQuantity); // Kiểm tra tổng số lượng
+
+    // Cập nhật số lượng hiển thị bên cạnh biểu tượng giỏ hàng
+    const cartQuantityElement = document.querySelector('.dot-cart');
+    if (cartQuantityElement) {
+        cartQuantityElement.textContent = totalQuantity;
+        console.log('Updated Cart Quantity:', cartQuantityElement.textContent); 
+    }
+});
 </script>
 </body>
 <!-- Footer -->
