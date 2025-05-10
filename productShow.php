@@ -6,6 +6,7 @@ $conn=create_connection();
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $searchTerm = mysqli_real_escape_string($conn, $searchTerm); // sanitize
 
+
 ?>
 
 <!DOCTYPE html>
@@ -18,6 +19,7 @@ $searchTerm = mysqli_real_escape_string($conn, $searchTerm); // sanitize
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="asset/css/style.css">
+    <script src="main.js"></script>
     <style>
         .page-top, header {
             color: whitesmoke;
@@ -123,30 +125,37 @@ $searchTerm = mysqli_real_escape_string($conn, $searchTerm); // sanitize
 
 <?php
 $sql = "SELECT product.* FROM product JOIN category ON product.categoryId = category.categoryId WHERE product.name LIKE '%$searchTerm%' OR category.name LIKE '%$searchTerm%'";
-
 $result = mysqli_query($conn, $sql);
 
 if (mysqli_num_rows($result) > 0) {
     while ($row = mysqli_fetch_assoc($result)) {
+        $pID = $row['productId']; // ✅ Add this line to define $pID
         $pname = $row['name'];
         $price = $row['price'];
         $des = $row['description'];
         $stock = $row['stockQuantity'];
-        $img = $row['image']; // make sure DB has image paths
+        $img = $row['image'];
 ?>
-        
-        <div class="col-12 col-sm-6 col-md-4 col-lg-2 py-3 px-1">
-                <div class="card h-100 border" onclick="">
-                    <img class="card-img-top" src="asset/productImg/<?=$img?>" alt="Image">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-4">
+            <a href="productDetail.php?productId=<?= $pID ?>" class="text-decoration-none text-dark">
+                <div class="card h-100">
+                    <img class="card-img-top img-fluid" src="asset/productImg/<?= $img ?>" alt="Image">
                     <div class="card-body">
                         <h5 class="card-title"><?= $pname ?></h5>
                         <h6 class="card-subtitle mb-2 text-muted">$<?= $price ?></h6>
                         <p class="card-text"><?= $des ?></p>
-                        <p class="card-text"><small class="text-muted">Stock: <?=$stock ?></small></p>
+                        <p class="card-text"><small class="text-muted">Stock: <?= $stock ?></small></p>
                     </div>
                 </div>
-            </div>
+            </a>
+        </div>
 <?php
+    }
+} else {
+    echo "<p>No results for '$searchTerm'</p>";
+}
+?>
+
     }
 } else {
     echo "<p>No results  for '$searchTerm'</p>";
@@ -186,4 +195,47 @@ if (mysqli_num_rows($result) > 0) {
     });
 </script>
 </body>
+<footer class="bg-dark text-white pt-5 pb-3 mt-5">
+  <div class="container">
+    <div class="row">
+      <!-- About Us -->
+      <div class="col-md-4">
+        <h5>About Us</h5>
+        <p>We offer top-quality computers, laptops, and accessories. Trusted by thousands of tech enthusiasts.</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-md-4">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="index.php" class="text-white">Home</a></li>
+          <li><a href="products.php" class="text-white">Products</a></li>
+          <li><a href="about.php" class="text-white">About</a></li>
+          <li><a href="contact.php" class="text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="col-md-4">
+        <h5>Contact Us</h5>
+        <p><i class="fa-solid fa-phone-volume"></i> +123 456 7890</p>
+        <p><i class="fa-solid fa-envelope"></i> support@computershop.com</p>
+        <p><i class="fa-solid fa-map-location-dot"></i> 131, Dao Cam Moc Street, Dis 8, HCM city</p>
+      </div>
+    </div>
+    
+
+
+
+    <hr class="bg-light">
+
+    <div class="text-center">
+      &copy; <?php echo date("Y"); ?> Computer Shop. All rights reserved.
+    </div>
+  </div>
+</footer>
+<!-- Scroll to Top Button -->
+<button onclick="topFunction()" id="scrollTopBtn" class="btn btn-primary" style="font-weight: bolder; ">
+  ↑
+</button>
 </html>

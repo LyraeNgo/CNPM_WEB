@@ -1,10 +1,27 @@
 <?php 
+    session_start();
     require_once("./BE/db.php");
     require_once("./BE/product.php");
     $conn = create_connection();
     if($conn->connect_error) {
         die("fail to connect" . $conn->connect_error);
     }
+
+    $username = $_SESSION['username'];
+
+    $stmt = $conn->prepare("SELECT name FROM customer WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $stmt->close();
+      $conn->close();
+    
+    $username='Tài Khoản';
+    if(isset($_SESSION['username'])){
+      $username = $row['name'];
+    }}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,7 +80,7 @@
             <!-- account and cart -->
             <div class="col-12 col-md-3 text-center text-md-right text-dark">
                 <ul class="list-inline mb-0">
-                    <li class="list-inline-item"><a href="account.php"><i class="fa-solid fa-user"></i> Tài khoản</a></li>
+                    <li class="list-inline-item"><a href="account.php"><i class="fa-solid fa-user"></i> <?= $username?></a></li>
                     <li class="list-inline-item "><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></li>
                 </ul>
             </div>
