@@ -56,7 +56,7 @@ $product = $result->fetch_assoc();
             <div class="col text-center text-md-left">
                 <ul class="list-inline mb-0">
                     <li class="list-inline-item mr-3"><i class="fa-solid fa-phone-volume"></i> <a href="tel:0905379388" class="text-white">0905379388</a></li>
-                    <li class="list-inline-item"><i class="fa-solid fa-envelope"></i> <a href="mailto:nguyencaoky1603@gmail.com" class="text-white">nguyencaoky1603@gmail.com</a></li>
+                    <li class="list-inline-item"><i class="fa-solid fa-envelope"></i> <a href="contact.html" class="text-white">LIÊN HỆ</a></li>
                 </ul>
             </div>
         </div>
@@ -146,16 +146,39 @@ $product = $result->fetch_assoc();
 
 </div>
 
+<!-- Slider -->
+<section class="section-slider py-5 mt-5 pt-5">
+    <div class="container">
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img class="img-fluid w-100" src="asset/images/30-4-trang-chu-pc.jpg" alt=""></div>
+                <div class="swiper-slide"><img class="img-fluid w-100" src="asset/images/banner-core-ultra.jpg" alt=""></div>
+                <div class="swiper-slide"><img class="img-fluid w-100" src="asset/images/banner-trang-chu-build-pc-30-4.jpg" alt=""></div>
+                <div class="swiper-slide"><img class="img-fluid w-100" src="asset/images/banner-trang-chu-tang-game.jpg" alt=""></div>
+                <div class="swiper-slide"><img class="img-fluid w-100" src="asset/images/banner-vga-rtx-5080-1.jpg" alt=""></div>
+                <div class="swiper-slide"><img class="img-fluid w-100" src="asset/images/WEB_BANNERTRANGCHUPCGAMINGGIATU8TR.jpg" alt=""></div>
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
+            <div class="autoplay-progress">
+                <svg viewBox=""></svg>
+                <span></span>
+            </div>
+        </div>
+    </div>
+</section>
+
 
 <!-- Product Details -->
-<section class="py-5 mt-5 pt-5">
+<section class="py-5">
     <div class="container">
         <div class="row">
             <div class="col-md-6">
                 <img src="asset/productImg/<?=$product['image']?>" class="img-fluid" alt="<?=$product['name']?>">
             </div>
             <div class="col-md-6">
-                <h2 style="font-weight:bolder"><?=$product['name']?></h2>
+                <h3><?=$product['name']?></h3>
                 <p><strong>Description:</strong> <?=$product['description']?></p>
                 <p><strong>Price:</strong> $<?=$product['price']?></p>
                 <p><strong>Stock:</strong> <?=$product['stockQuantity']?></p>
@@ -199,7 +222,33 @@ $product = $result->fetch_assoc();
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
+<!-- swiper js -->
+<script>
+    const progressCircle = document.querySelector(".autoplay-progress svg");
+    const progressContent = document.querySelector(".autoplay-progress span");
+    var swiper = new Swiper(".mySwiper", {
+        spaceBetween: 30,
+        centeredSlides: true,
+        autoplay: {
+            delay: 2500,
+            disableOnInteraction: false
+        },
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev"
+        },
+        on: {
+            autoplayTimeLeft(s, time, progress) {
+                progressCircle.style.setProperty("--progress", 1 - progress);
+                progressContent.textContent = `${Math.ceil(time / 1000)}s`;
+            }
+        }
+    });
+</script>
 </body>
 <!-- Footer -->
 <footer class="bg-dark text-white pt-5 pb-3 mt-5">
@@ -217,8 +266,7 @@ $product = $result->fetch_assoc();
         <ul class="list-unstyled">
           <li><a href="index.php" class="text-white">Home</a></li>
           <li><a href="products.php" class="text-white">Products</a></li>
-          <li><a href="about.php" class="text-white">About</a></li>
-          <li><a href="contact.php" class="text-white">Contact</a></li>
+          <li><a href="contact." class="text-white">Contact</a></li>
         </ul>
       </div>
 
