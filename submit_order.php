@@ -35,7 +35,7 @@
 </head>
 <body>
   <header class="navbar">
-    <div class="logo"><a href="index.html">🖥️ GIANG-HIEUKY</a></div>
+    <div class="logo"><a href="index.php">🖥️ GIANG-HIEUKY</a></div>
     <div class="nav-right">
       <a href="index.php">Trang chủ</a>
       <?php if (isset($_SESSION['username'])): ?>
