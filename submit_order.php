@@ -123,29 +123,46 @@
     $(document).ready(function() {
       // Get selected products from localStorage
       const selectedProducts = JSON.parse(localStorage.getItem('selectedProducts') || '[]');
+      console.log('Selected products loaded from localStorage:', selectedProducts);
       
       // Clear existing cart items
       $('.cart-item').remove();
       
+      if (selectedProducts.length === 0) {
+        console.warn('No selected products found in localStorage');
+        $('.cart-header').after('<div class="text-center py-4">Không có sản phẩm nào được chọn</div>');
+        return;
+      }
+      
       // Add selected products to the cart
-      selectedProducts.forEach(product => {
+      selectedProducts.forEach((product, index) => {
+        console.log(`Processing selected product ${index}:`, product);
+        
+        // Ensure all required properties exist
+        const productName = product.name || 'Không có tên';
+        const productPrice = product.price || 0;
+        const productQty = product.quantity || 1;
+        const productCat = product.categoryId || 'Không xác định';
+        const productImg = product.image || '';
+        
         const cartItem = `
           <div class="cart-item">
             <div class="product-info">
-              <img src="asset/productImg/${product.image}" alt="">
+              <img src="asset/productImg/${productImg}" alt="${productName}">
               <div>
-                <p>${product.name}</p>
-                <small>Phân loại: <input type="text" name="category[]" value="${product.category}" readonly></small>
-                <input type="hidden" name="productName[]" value="${product.name}">
-                <input type="hidden" name="price[]" value="${product.price}">
-                <input type="hidden" name="quantity[]" value="${product.quantity}">
+                <p>${productName}</p>
+                <small>Phân loại: <input type="text" name="category[]" value="${productCat}" readonly></small>
+                <input type="hidden" name="productName[]" value="${productName}">
+                <input type="hidden" name="price[]" value="${productPrice}">
+                <input type="hidden" name="quantity[]" value="${productQty}">
+                <input type="hidden" name="image[]" value="${productImg}">
               </div>
             </div>
-            <div>₫${parseInt(product.price).toLocaleString()}</div>
+            <div>₫${parseInt(productPrice).toLocaleString()}</div>
             <div class="quantity">
-              <input type="text" name="quantity" value="${product.quantity}" readonly>
+              <input type="text" name="quantity_display" value="${productQty}" readonly>
             </div>
-            <div class="subtotal">₫${(parseInt(product.price) * parseInt(product.quantity)).toLocaleString()}</div>
+            <div class="subtotal">₫${(parseInt(productPrice) * parseInt(productQty)).toLocaleString()}</div>
             <div><button type="button" class="remove-btn" disabled>Xóa</button></div>
           </div>
         `;
@@ -155,9 +172,10 @@
       // Calculate and display total
       let total = 0;
       selectedProducts.forEach(product => {
-        total += parseInt(product.price) * parseInt(product.quantity);
+        total += parseInt(product.price || 0) * parseInt(product.quantity || 1);
       });
       $('.total').text('₫' + total.toLocaleString());
+      console.log('Total price calculated:', total);
     });
 
     function generateQRCode() {
@@ -244,26 +262,91 @@
       });
   
       $('form').on('submit', function (e) {
-        e.preventDefault();
-        // Get form data
-        const formData = new FormData(this);
-        formData.append('paymentMethod', $('input[name="paymentMethod"]:checked').val());
-        
-        // Send data to server
-        $.ajax({
-          url: 'submit_order.php',
-          type: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          success: function(response) {
-            alert('Đặt hàng thành công!');
-            window.location.href = 'index.php';
-          },
-          error: function() {
-            alert('Có lỗi xảy ra khi đặt hàng!');
+        try {
+          e.preventDefault();
+          console.log('Form submitted');
+          
+          // Get form data
+          const formData = new FormData(this);
+          const paymentMethod = $('input[name="paymentMethod"]:checked').val() || 'COD';
+          console.log('Payment method:', paymentMethod);
+          
+          // Get all product data
+          const productData = [];
+          const productNames = document.querySelectorAll('input[name="productName[]"]');
+          const prices = document.querySelectorAll('input[name="price[]"]');
+          const quantities = document.querySelectorAll('input[name="quantity[]"]');
+          const categories = document.querySelectorAll('input[name="category[]"]');
+          const images = document.querySelectorAll('input[name="image[]"]');
+          
+          console.log('Product elements found:', 
+            'Names:', productNames.length, 
+            'Prices:', prices.length, 
+            'Quantities:', quantities.length, 
+            'Categories:', categories.length,
+            'Images:', images.length
+          );
+          
+          if (productNames.length === 0) {
+            console.error('No product data found in form');
+            alert('Không có sản phẩm nào để đặt hàng. Vui lòng chọn sản phẩm.');
+            return;
           }
-        });
+          
+          for (let i = 0; i < productNames.length; i++) {
+            productData.push({
+              product_name: productNames[i].value || 'Không có tên',
+              price: prices[i].value || '0',
+              quantity: quantities[i].value || '1',
+              category: categories[i].value || 'Không xác định',
+              image: images[i] ? images[i].value : ''
+            });
+          }
+          
+          console.log('Product data:', productData);
+          
+          // Create order object
+          const orderTotal = parseInt($('.total').text().replace(/[^\d]/g, '') || '0');
+          const customerName = '<?= htmlspecialchars($username) ?>' || 'Khách hàng';
+          
+          const orderData = {
+            customer_name: customerName,
+            products: productData,
+            paymentMethod: paymentMethod,
+            total: orderTotal,
+            created_at: new Date().toLocaleString(),
+            status: paymentMethod === 'COD' ? 'đồng ý' : 'đang chờ xác nhận'
+          };
+          
+          console.log('Order data to be saved:', orderData);
+          
+          // Save to localStorage
+          let orders = [];
+          try {
+            orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            if (!Array.isArray(orders)) {
+              console.error('Orders in localStorage is not an array, resetting');
+              orders = [];
+            }
+          } catch (parseError) {
+            console.error('Error parsing orders from localStorage:', parseError);
+            orders = [];
+          }
+          
+          orders.push(orderData);
+          localStorage.setItem('orders', JSON.stringify(orders));
+          console.log('Orders saved to localStorage. Current orders:', orders);
+          
+          // Clear selected products from localStorage
+          localStorage.removeItem('selectedProducts');
+          
+          // Alert success and redirect
+          alert('Đặt hàng thành công!');
+          window.location.href = 'index.php';
+        } catch (error) {
+          console.error('Error during form submission:', error);
+          alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.');
+        }
       });
     });
   </script>
