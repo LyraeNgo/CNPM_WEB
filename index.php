@@ -121,10 +121,12 @@
     <!-- Main menu -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ml-auto header-top-user_cart">
-        <li class="nav-item"><a class="nav-link" href="#">Laptop</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">PC gaming</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Màn hình</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">PC văn phòng</a></li>
+        <?php 
+
+        ?>
+        <li class="nav-item"><a class="nav-link" href="productShow.php?search=laptop">Laptop</a></li>
+        <li class="nav-item"><a class="nav-link" href="productShow.php?search=PC">PC gaming</a></li>
+        <li class="nav-item"><a class="nav-link" href="productShow.php?search=monitor">Màn hình</a></li>
         <li class="nav-item"><a class="nav-link" href="about.html">Giới thiệu</a></li>
       </ul>
     </div>
@@ -283,7 +285,8 @@
 // Hàm cập nhật số lượng sản phẩm trong giỏ hàng
 function updateCartCount() {
     // Lấy username hiện tại
-    const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+    const username = <?= json_encode(isset($_SESSION['username']) ? $_SESSION['username'] : "guest") ?>;
+
     const cartStorageKey = 'cartItems_' + username;
     
     // Lấy số lượng sản phẩm trong giỏ hàng từ localStorage với key tương ứng với user

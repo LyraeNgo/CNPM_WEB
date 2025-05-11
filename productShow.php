@@ -1,11 +1,27 @@
 <?php
-
+session_start();
 require_once('./BE/db.php');
-
+var_dump($_GET['search'] ?? 'no search param');
 $conn=create_connection();
 $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $searchTerm = mysqli_real_escape_string($conn, $searchTerm); // sanitize
+ $username = $_SESSION['username'];
 
+    $stmt = $conn->prepare("SELECT name FROM customer WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0) {
+      $row = $result->fetch_assoc();
+      $stmt->close();
+      $conn->close();
+    
+    
+    if(isset($_SESSION['username'])){
+      $username = $row['name'];
+    }else{
+      $username='Tài Khoản';
+    }}
 ?>
 
 <!DOCTYPE html>
@@ -144,15 +160,18 @@ $searchTerm = mysqli_real_escape_string($conn, $searchTerm); // sanitize
 </div>
 
 <!-- searching result -->
- <div class="container my-4">
-    <div class="alert alert-info text-center font-weight-bold">
-        Kết quả tìm kiếm cho: "<span class="text-primary"><?= htmlspecialchars($_GET['search']) ?></span>"
-    </div>
+ <div class="container py-5 mt-5 pt-5">
+    <?php if (isset($_GET['search']) && $_GET['search'] !== ''): ?>
+        <div class="alert alert-info text-center">
+          Bạn đang tìm kiếm: <strong><?= htmlspecialchars($_GET['search']) ?></strong>
+        </div>
+<?php endif; ?>
+
 </div>
 
 
 <!-- Slider -->
-<section class="section-slider py-5 mt-5 pt-5">
+<section class="section-slider ">
     <div class="container">
         <div class="swiper mySwiper">
             <div class="swiper-wrapper">
