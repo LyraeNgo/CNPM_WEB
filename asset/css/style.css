@@ -225,3 +225,17 @@ footer a:hover {
 #scrollTopBtn:hover{
     background-color: rgba(0, 0, 0, 0.8);
 }
+
+
+.category-box {
+  background-color: #2c2f36; /* Dark card background */
+  border: 1px solid #555;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.category-box:hover {
+  background-color: #3a3f47;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}

@@ -93,6 +93,11 @@ $searchTerm = mysqli_real_escape_string($conn, $searchTerm); // sanitize
         </div>
     </div>
 </nav>
+<div class="container my-4">
+    <div class="alert alert-info text-center ">
+       <h4 class="font-weight-bold">Kết quả tìm kiếm cho: "<span class="text-primary"><?= htmlspecialchars($_GET['search']) ?></span>"</h4> 
+    </div>
+</div>
 
 <!-- Slider -->
 <section class="section-slider py-3">

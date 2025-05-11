@@ -125,33 +125,38 @@
         <li class="nav-item"><a class="nav-link" href="#">PC gaming</a></li>
         <li class="nav-item"><a class="nav-link" href="#">Màn hình</a></li>
         <li class="nav-item"><a class="nav-link" href="#">PC văn phòng</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">Giới thiệu</a></li>
+        <li class="nav-item"><a class="nav-link" href="about.html">Giới thiệu</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
 <!-- CATEGORY GRID -->
-<div class="container collapse " id="cate" >
+<div class="container collapse" id="cate">
   <div class="row">
     <?php 
       require_once("./BE/db.php");
       $conn = create_connection();
       $sql = "SELECT * FROM category";
-      $caterogy = $conn->query($sql);
+      $category = $conn->query($sql);
 
-      if ($caterogy && $caterogy->num_rows > 0) {
-          while ($row = $caterogy->fetch_assoc()) {?>
-              <div class="col-6 col-md-2 mb-3 col-lg-2">;
-                <div class="border  text-center text-white"> <?=htmlspecialchars($row['name']) ?> </div>;
-              </div>;
-        <?php }
+      if ($category && $category->num_rows > 0) {
+          while ($row = $category->fetch_assoc()) { ?>
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+              <a href="productShow.php?search=<?=$row['name']?>">
+              <div class="category-box text-white text-center py-2 px-2 rounded shadow-sm border">
+                <?= htmlspecialchars($row['name']) ?>
+              </div>
+              </a>
+            </div>
+    <?php }
       } else {
-          echo '<div class="col-12 text-danger">Không có danh mục!</div>';
+        echo '<div class="col-12 text-danger">Không có danh mục!</div>';
       }
     ?>
   </div>
 </div>
+
 
 
 </div>
