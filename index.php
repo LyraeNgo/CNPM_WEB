@@ -141,11 +141,11 @@
       $caterogy = $conn->query($sql);
 
       if ($caterogy && $caterogy->num_rows > 0) {
-          while ($row = $caterogy->fetch_assoc()) {?>
-              <div class="col-6 col-md-2 mb-3 col-lg-2">;
-                <div class="border  text-center text-white"> <?=htmlspecialchars($row['name']) ?> </div>;
-              </div>;
-        <?php }
+          while ($row = $caterogy->fetch_assoc()) {
+              echo '<div class="col-6 col-md-2 mb-3">';
+              echo '<div class="border p-1 text-center text-white">' . htmlspecialchars($row['name']) . '</div>';
+              echo '</div>';
+          }
       } else {
           echo '<div class="col-12 text-danger">Không có danh mục!</div>';
       }
@@ -275,19 +275,52 @@
     });
 </script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Lấy số lượng sản phẩm trong giỏ hàng từ localStorage
-    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-    console.log('Cart Items:', cartItems); // Kiểm tra dữ liệu trong localStorage
-    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    console.log('Total Quantity:', totalQuantity); // Kiểm tra tổng số lượng
+// Hàm cập nhật số lượng sản phẩm trong giỏ hàng
+function updateCartCount() {
+    // Lấy username hiện tại
+    const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+    const cartStorageKey = 'cartItems_' + username;
+    
+    // Lấy số lượng sản phẩm trong giỏ hàng từ localStorage với key tương ứng với user
+    const cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+    
+    // Tính tổng số lượng sản phẩm
+    const totalQuantity = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
 
     // Cập nhật số lượng hiển thị bên cạnh biểu tượng giỏ hàng
     const cartQuantityElement = document.querySelector('.dot-cart');
     if (cartQuantityElement) {
         cartQuantityElement.textContent = totalQuantity;
-        console.log('Updated Cart Quantity:', cartQuantityElement.textContent); // Kiểm tra cập nhật giao diện
     }
+    
+    console.log(`[${new Date().toLocaleTimeString()}] Cập nhật số lượng giỏ hàng: ${totalQuantity}`);
+    return totalQuantity;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Cập nhật số lượng giỏ hàng khi trang được tải
+    updateCartCount();
+    
+    // Kiểm tra xem giỏ hàng vừa được cập nhật từ trang submit_order không
+    if (localStorage.getItem('cart_just_updated') === 'true') {
+        console.log('Phát hiện cập nhật giỏ hàng mới!');
+        // Xóa cờ hiệu
+        localStorage.removeItem('cart_just_updated');
+        
+        // Cập nhật số lượng giỏ hàng lần nữa để đảm bảo hiển thị đúng
+        setTimeout(function() {
+            const count = updateCartCount();
+            console.log('Số lượng giỏ hàng sau khi cập nhật:', count);
+        }, 100);
+    }
+    
+    // Kiểm tra giá trị trong localStorage
+    const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+    const cartStorageKey = 'cartItems_' + username;
+    console.log('Giỏ hàng hiện tại:', JSON.parse(localStorage.getItem(cartStorageKey) || '[]'));
+    
+    // Cập nhật số lượng sau mỗi 3 giây để đồng bộ với các thay đổi có thể xảy ra từ các tab khác
+    setInterval(updateCartCount, 3000);
 });
 </script>
 </body>
