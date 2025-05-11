@@ -61,10 +61,10 @@ if (isset($product_data['category'])) {
         
         // Kiểm tra xem sản phẩm đã tồn tại chưa
         $stmt = $conn->prepare("SELECT productId FROM product WHERE name = ?");
-        error_log("Check tồn tại sản phẩm: " . $result->num_rows);
         $stmt->bind_param("s", $name);
         $stmt->execute();
         $result = $stmt->get_result();
+        error_log("Check tồn tại sản phẩm: " . $result->num_rows);
         
         if ($result->num_rows > 0) {
             // Sản phẩm đã tồn tại
