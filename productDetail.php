@@ -284,7 +284,7 @@ $product = $result->fetch_assoc();
         on: {
             autoplayTimeLeft(s, time, progress) {
                 progressCircle.style.setProperty("--progress", 1 - progress);
-                progressContent.textContent = `${Math.ceil(time / 1000)}s`;
+                // progressContent.textContent = `${Math.ceil(time / 1000)}s`;
             }
         }
     });

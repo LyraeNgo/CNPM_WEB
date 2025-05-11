@@ -270,7 +270,7 @@ if (mysqli_num_rows($result) > 0) {
         on: {
             autoplayTimeLeft(s, time, progress) {
                 progressCircle.style.setProperty("--progress", 1 - progress);
-                progressContent.textContent = `${Math.ceil(time / 1000)}s`;
+                progressContent.textContent = `${Math.ceil(time / 1000)}s`;progressContent.textContent = `${Math.ceil(time / 1000)}s`;
             }
         }
     });
