@@ -135,16 +135,18 @@ if (mysqli_num_rows($result) > 0) {
         $img = $row['image']; // make sure DB has image paths
 ?>
         
-        <div class="col-12 col-sm-6 col-md-4 col-lg-2 py-3 px-1">
-                <div class="card h-100 border" onclick="">
-                    <img class="card-img-top" src="asset/productImg/<?=$img?>" alt="Image">
-                    <div class="card-body">
-                        <h5 class="card-title"><?= $pname ?></h5>
-                        <h6 class="card-subtitle mb-2 text-muted">$<?= $price ?></h6>
-                        <p class="card-text"><?= $des ?></p>
-                        <p class="card-text"><small class="text-muted">Stock: <?=$stock ?></small></p>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 mb-4">
+                <a href="productDetail.php?productId=<?= $pID ?>" class="text-decoration-none text-dark">
+                    <div class="card h-100">
+                        <img class="card-img-top img-fluid" src="asset/productImg/<?=$img?>" alt="Image">
+                        <div class="card-body">
+                            <h5 class="card-title"><?= $pname ?></h5>
+                            <h6 class="card-subtitle mb-2 text-muted">$<?= $price ?></h6>
+                            <p class="card-text"><?= $des ?></p>
+                            <p class="card-text"><small class="text-muted">Stock: <?= $stock ?></small></p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
 <?php
     }

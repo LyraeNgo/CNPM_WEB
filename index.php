@@ -141,11 +141,11 @@
       $caterogy = $conn->query($sql);
 
       if ($caterogy && $caterogy->num_rows > 0) {
-          while ($row = $caterogy->fetch_assoc()) {
-              echo '<div class="col-6 col-md-2 mb-3">';
-              echo '<div class="border p-1 text-center text-white">' . htmlspecialchars($row['name']) . '</div>';
-              echo '</div>';
-          }
+          while ($row = $caterogy->fetch_assoc()) {?>
+              <div class="col-6 col-md-2 mb-3 col-lg-2">;
+                <div class="border  text-center text-white"> <?=htmlspecialchars($row['name']) ?> </div>;
+              </div>;
+        <?php }
       } else {
           echo '<div class="col-12 text-danger">Không có danh mục!</div>';
       }
