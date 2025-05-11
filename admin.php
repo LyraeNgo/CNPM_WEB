@@ -40,6 +40,7 @@ require_once("./BE/db.php");
       <h2>Admin Panel</h2>
       <div class="nav-right">
         <a href="index.php" class="btn btn-outline-light">Trang chủ</a>
+        <a href="manage_product.php" class="btn btn-outline-light">Quản Lý Sản Phẩm</a>
         <a href="logout.php" class="btn btn-outline-danger">Đăng xuất</a>
       </div>
     </div>
