@@ -28,7 +28,7 @@ try {
             
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
-                $customerId = $row['customerId'];
+                $customerId = $row['customerId'];   
             }
             $stmt->close();
         }
