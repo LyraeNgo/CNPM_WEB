@@ -6,23 +6,22 @@
     if($conn->connect_error) {
         die("fail to connect" . $conn->connect_error);
     }
-
-    $username = $_SESSION['username'];
-
-    $stmt = $conn->prepare("SELECT name FROM customer WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if($result->num_rows > 0) {
-      $row = $result->fetch_assoc();
-      $stmt->close();
-      $conn->close();
     
-    if(isset($_SESSION['username'])){
-      $username = $row['name'];
-    }else{
-      $username='Tài Khoản';
-    }}
+    if(isset($_SESSION['username'])) {
+        $username = $_SESSION['username'];
+        $stmt = $conn->prepare("SELECT name FROM customer WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if($result->num_rows > 0) {
+          $row = $result->fetch_assoc();
+          $username = $row['name'];
+        }
+        $stmt->close();
+    } else {
+        $username = 'Tài Khoản';
+    }
+    $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -84,18 +83,28 @@
   <script>
     // Function to update cart quantity display throughout the app
     function updateCartQuantity() {
-      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+      const cartStorageKey = 'cartItems_' + username;
+      const cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
       const totalQuantity = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
       const cartQuantityElements = document.querySelectorAll('.dot-cart');
       cartQuantityElements.forEach(element => {
         element.textContent = totalQuantity;
       });
+      return totalQuantity;
+    }
+    
+    // Standard function for updating cart count - consistent across all pages
+    function updateCartCount() {
+      return updateCartQuantity();
     }
     
     $(document).ready(function() {
       <?php if (isset($_SESSION['username'])): ?>
-        // Load cart items from localStorage
-        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        // Load cart items from localStorage with user-specific key
+        const username = '<?= $_SESSION['username'] ?>';
+        const cartStorageKey = 'cartItems_' + username;
+        const cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
         
         if (cartItems.length === 0) {
           $('#cartItems').html('<div class="text-center py-4">Giỏ hàng của bạn đang trống</div>');
@@ -158,14 +167,19 @@
         const newQty = Math.max(1, currentQty + amount);
         qtyInput.value = newQty;
         updateSubtotal(productId);
-        let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        
+        // Use user-specific storage key
+        const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+        const cartStorageKey = 'cartItems_' + username;
+        let cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+        
         cartItems = cartItems.map(item => {
           if (item.id == productId) {
             item.quantity = newQty;
           }
           return item;
         });
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        localStorage.setItem(cartStorageKey, JSON.stringify(cartItems));
         // Update cart quantity display
         updateCartQuantity();
       }
@@ -182,8 +196,12 @@
   
     function removeProduct(productId) {
       if (confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')) {
+        // Get current user
+        const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+        const cartStorageKey = 'cartItems_' + username;
+        
         // Lấy danh sách sản phẩm từ localStorage
-        let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        let cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
         console.log('Before removal:', cartItems);
         
         // Convert productId to number to ensure consistent comparison
@@ -194,8 +212,8 @@
         console.log('After removal:', cartItems);
         
         // Cập nhật lại localStorage
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-        console.log('Updated localStorage:', JSON.parse(localStorage.getItem('cartItems')));
+        localStorage.setItem(cartStorageKey, JSON.stringify(cartItems));
+        console.log('Updated localStorage:', JSON.parse(localStorage.getItem(cartStorageKey)));
         
         // Xóa phần tử khỏi DOM
         const cartItem = document.querySelector(`.cart-item input[value="${productId}"]`).closest('.cart-item');
@@ -249,13 +267,8 @@
 
       $('form').on('submit', function (e) {
         e.preventDefault();
-        const anyChecked = $('input[name="productId[]"]:checked').length > 0;
-        if (!anyChecked) {
-          alert('Vui lòng chọn ít nhất một sản phẩm trước khi mua hàng.');
-          return;
-        }
-
-        // Get all selected products data
+        
+        // Get selected products
         const selectedProducts = [];
         $('input[name="productId[]"]:checked').each(function() {
           const item = $(this).closest('.cart-item');
@@ -264,14 +277,30 @@
             name: item.find('input[name="productName[]"]').val(),
             price: item.find('input[name="price[]"]').val(),
             quantity: item.find('input[name="quantity[]"]').val(),
-            category: item.find('input[name="category[]"]').val()
+            categoryId: item.find('input[name="categoryId[]"]').val(),
+            image: item.find('img').attr('src').split('/').pop(),
+            description: item.find('input[name="description[]"]').val(),
+            stockQuantity: item.find('input[name="stockQuantity[]"]').val()
           });
         });
-
-        // Store the data in localStorage
-        localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
         
-        // Redirect to submit_order.html
+        if (selectedProducts.length === 0) {
+          alert('Vui lòng chọn ít nhất một sản phẩm để mua');
+          return;
+        }
+        
+        // Lưu lại danh sách ID sản phẩm đã chọn để sau này có thể xóa ra khỏi giỏ hàng
+        const selectedIds = selectedProducts.map(p => p.id);
+        
+        // Store selected products in localStorage with user-specific key
+        const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+        localStorage.setItem('selectedProducts_' + username, JSON.stringify(selectedProducts));
+        localStorage.setItem('selectedProductIds_' + username, JSON.stringify(selectedIds));
+        
+        // Đánh dấu là đang chuẩn bị đặt hàng
+        localStorage.setItem('preparing_order', 'true');
+        
+        // Submit the form to proceed to checkout
         window.location.href = 'submit_order.php';
       });
 

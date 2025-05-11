@@ -116,7 +116,7 @@ $product = $result->fetch_assoc();
     <a href="account.php"><i class="fa-solid fa-user"></i> Tài Khoản</a>
   <?php endif; ?>
 </li>
-                    <li class="list-inline-item "><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></li>
+                    <li class="list-inline-item"><a href="cart.php"><i class="fa-solid fa-cart-shopping"></i> <span class="dot-cart">0</span></a></li>
                 </ul>
             </div>
         </div>
@@ -290,6 +290,32 @@ $product = $result->fetch_assoc();
     });
 </script>
 <script>
+    // Hàm cập nhật số lượng sản phẩm trong giỏ hàng
+    function updateCartCount() {
+        // Lấy username hiện tại
+        const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+        const cartStorageKey = 'cartItems_' + username;
+        
+        // Lấy số lượng sản phẩm trong giỏ hàng từ localStorage với key tương ứng với user
+        const cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+        
+        // Tính tổng số lượng sản phẩm
+        const totalQuantity = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+
+        // Cập nhật số lượng hiển thị bên cạnh biểu tượng giỏ hàng
+        const cartQuantityElement = document.querySelector('.dot-cart');
+        if (cartQuantityElement) {
+            cartQuantityElement.textContent = totalQuantity;
+        }
+        
+        return totalQuantity;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cập nhật số lượng giỏ hàng khi trang được tải
+        updateCartCount();
+    });
+
     document.getElementById('addToCartForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -299,6 +325,10 @@ $product = $result->fetch_assoc();
             window.location.href = 'account.php';
             return;
         <?php endif; ?>
+
+        // Get current username
+        const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+        const cartStorageKey = 'cartItems_' + username;
 
         // Get form data
         const formData = new FormData(this);
@@ -313,8 +343,8 @@ $product = $result->fetch_assoc();
             quantity: 1
         };
 
-        // Get existing cart items from localStorage
-        let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        // Get existing cart items from localStorage using user-specific key
+        let cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
         
         // Check if product already exists in cart
         const existingItemIndex = cartItems.findIndex(item => item.id === productData.id);
@@ -330,8 +360,11 @@ $product = $result->fetch_assoc();
             cartItems.push(productData);
         }
 
-        // Save updated cart to localStorage
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        // Save updated cart to localStorage with user-specific key
+        localStorage.setItem(cartStorageKey, JSON.stringify(cartItems));
+        
+        // Cập nhật số lượng sản phẩm trong giỏ hàng
+        updateCartCount();
         
         // Redirect to cart page
         window.location.href = 'cart.php';
@@ -383,3 +416,27 @@ $product = $result->fetch_assoc();
 </button>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

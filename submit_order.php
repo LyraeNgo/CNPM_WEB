@@ -121,9 +121,11 @@
 
   <script>
     $(document).ready(function() {
-      // Get selected products from localStorage
-      const selectedProducts = JSON.parse(localStorage.getItem('selectedProducts') || '[]');
-      console.log('Selected products loaded from localStorage:', selectedProducts);
+      // Get selected products from localStorage with user-specific key
+      const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+      const storageKey = 'selectedProducts_' + username;
+      const selectedProducts = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      console.log('Selected products loaded from localStorage for user:', username, selectedProducts);
       
       // Clear existing cart items
       $('.cart-item').remove();
@@ -293,17 +295,27 @@
             return;
           }
           
+          // Lưu lại ID của các sản phẩm để sau này xóa khỏi giỏ hàng
+          const productIds = [];
+          
           for (let i = 0; i < productNames.length; i++) {
-            productData.push({
+            const productInfo = {
               product_name: productNames[i].value || 'Không có tên',
               price: prices[i].value || '0',
               quantity: quantities[i].value || '1',
               category: categories[i].value || 'Không xác định',
               image: images[i] ? images[i].value : ''
-            });
+            };
+            productData.push(productInfo);
+            
+            // Nếu có id sản phẩm, lưu lại để xóa khỏi giỏ hàng
+            if (images[i] && images[i].dataset && images[i].dataset.productId) {
+              productIds.push(images[i].dataset.productId);
+            }
           }
           
           console.log('Product data:', productData);
+          console.log('Product IDs to remove from cart:', productIds);
           
           // Create order object
           const orderTotal = parseInt($('.total').text().replace(/[^\d]/g, '') || '0');
@@ -337,12 +349,69 @@
           localStorage.setItem('orders', JSON.stringify(orders));
           console.log('Orders saved to localStorage. Current orders:', orders);
           
-          // Clear selected products from localStorage
-          localStorage.removeItem('selectedProducts');
+          // Save user-specific orders
+          const username = '<?= isset($_SESSION['username']) ? $_SESSION['username'] : "guest" ?>';
+          const userOrdersKey = 'orders_' + username;
+          let userOrders = [];
+          try {
+            userOrders = JSON.parse(localStorage.getItem(userOrdersKey) || '[]');
+            if (!Array.isArray(userOrders)) {
+              userOrders = [];
+            }
+          } catch (error) {
+            userOrders = [];
+          }
+          userOrders.push(orderData);
+          localStorage.setItem(userOrdersKey, JSON.stringify(userOrders));
           
-          // Alert success and redirect
+          // Xóa sản phẩm đã đặt khỏi giỏ hàng
+          localStorage.removeItem('selectedProducts_' + username);
+          
+          // Lấy danh sách ID sản phẩm đã chọn trực tiếp từ localStorage (đã lưu từ cart.php)
+          const selectedProductIds = JSON.parse(localStorage.getItem('selectedProductIds_' + username) || '[]');
+          console.log('selectedProductIds from localStorage:', selectedProductIds);
+          
+          // Xóa sản phẩm đã đặt hàng khỏi giỏ hàng
+          const cartStorageKey = 'cartItems_' + username;
+          const cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+          console.log('Current cart items:', cartItems);
+          
+          // Lọc giữ lại sản phẩm không có trong đơn hàng vừa đặt
+          const remainingItems = cartItems.filter(item => !selectedProductIds.includes(item.id));
+          console.log('Remaining cart items after filtering:', remainingItems);
+          localStorage.setItem(cartStorageKey, JSON.stringify(remainingItems));
+          
+          // Xóa danh sách ID sản phẩm đã chọn
+          localStorage.removeItem('selectedProductIds_' + username);
+          localStorage.removeItem('preparing_order');
+          
+          // Định nghĩa hàm updateCartCount() để đảm bảo icon giỏ hàng được cập nhật
+          function updateCartCount() {
+            const cartItems = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+            const totalQuantity = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+            // Nếu có thể, cập nhật icon giỏ hàng tại đây
+            if (window.opener && !window.opener.closed) {
+              try {
+                // Nếu submit_order.php được mở từ trang khác, cập nhật trang đó
+                if (typeof window.opener.updateCartCount === 'function') {
+                  window.opener.updateCartCount();
+                }
+              } catch (e) {
+                console.error('Không thể gọi hàm updateCartCount từ trang mẹ:', e);
+              }
+            }
+            return totalQuantity;
+          }
+          
+          // Gọi hàm để cập nhật số lượng giỏ hàng
+          updateCartCount();
+          
+          // Alert success
           alert('Đặt hàng thành công!');
-          window.location.href = 'index.php';
+          setTimeout(function() {
+            localStorage.setItem('cart_just_updated', 'true');
+            window.location.href = 'index.php';
+          }, 500); 
         } catch (error) {
           console.error('Error during form submission:', error);
           alert('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.');
